@@ -1,0 +1,36 @@
+# 数据工具（BI）分系统 — 默认配置（所有连接参数均 env 可覆盖；不含真实主机/凭据，红线合规）
+spring:
+  application:
+    name: tools-bi
+  datasource:
+    # Doris FE 兼容 MySQL 协议（默认查询端口 9030）；默认连 information_schema（Doris 内置、必存在）。
+    # allowPublicKeyRetrieval/useSSL 适配 MySQL 协议握手（本地/替身免 TLS）。
+    url: jdbc:mysql://${DORIS_HOST:localhost}:${DORIS_PORT:9030}/${DORIS_DB:information_schema}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DORIS_USER:root}
+    password: ${DORIS_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: never          # 基座不建业务库表（报表/取数库由 control-plane 按租户开通）
+
+# 健康检查 / 可观测：复用 starter-observability（actuator + /actuator/prometheus）。
+# OTel 链路走部署期 Java agent（不绑代码），见 README / Dockerfile 注释。
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+# 平台公共能力开关（libs-java starter）
+hashmatrix:
+  observability:
+    service-name: tools-bi
+    common-tags:
+      subsystem: tools-bi
+  audit:
+    enabled: true

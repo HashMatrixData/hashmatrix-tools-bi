@@ -1,0 +1,8 @@
+# 本地独立运行 profile：对接 docker-compose.local.yml 起的真实 Apache Doris。
+# 以 `--spring.profiles.active=local` 激活；值与默认一致，显式留档便于本地调试覆盖。
+# Doris all-in-one 默认 root 用户、空密码、FE 查询端口 9030。
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:9030/information_schema?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password:
