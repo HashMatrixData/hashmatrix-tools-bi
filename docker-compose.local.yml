@@ -1,0 +1,20 @@
+# 本地独立运行依赖栈：真实 Apache Doris（all-in-one，FE+BE 同容器，仅供本地开发调试）。
+# 用法：docker compose -f docker-compose.local.yml up -d
+# 凭据/库名均为脱敏占位（红线合规）；本地数据为临时态（未挂持久卷，容器销毁即清）。
+#
+# 端口：8030 = FE Web/HTTP，9030 = FE 查询端口（MySQL 协议，应用经此取数），8040 = BE Web。
+# Doris all-in-one 默认 root 用户、空密码。资源占用较高，首次启动需较长时间（FE+BE 自举）。
+services:
+  doris:
+    image: apache/doris:doris-all-in-one-2.1.0
+    ports:
+      - "8030:8030"
+      - "9030:9030"
+      - "8040:8040"
+    healthcheck:
+      # FE 起来后 HTTP 端口可达即视为就绪（wget 随基础镜像提供）
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8030/api/bootstrap >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
